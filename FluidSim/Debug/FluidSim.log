@@ -1,5 +1,8 @@
 ﻿  Main.cpp
-LINK : warning LNK4098: defaultlib 'LIBCMT' conflicts with use of other libs; use /NODEFAULTLIB:library
-LINK : warning LNK4098: defaultlib 'MSVCRT' conflicts with use of other libs; use /NODEFAULTLIB:library
-glew32s.lib(glew.obj) : warning LNK4099: PDB '' was not found with 'glew32s.lib(glew.obj)' or at ''; linking object as if no debug info
+C:\Users\JTSte\source\repos\FluidSim\FluidSim\src\Main.cpp(149,18): warning C4244: 'initializing': conversion from 'double' to 'float', possible loss of data
+C:\Users\JTSte\source\repos\FluidSim\FluidSim\src\Main.cpp(197,18): warning C4244: 'initializing': conversion from 'int' to 'float', possible loss of data
+C:\Users\JTSte\source\repos\FluidSim\FluidSim\src\Main.cpp(222,21): warning C4244: 'initializing': conversion from 'float' to 'int', possible loss of data
+C:\Users\JTSte\source\repos\FluidSim\FluidSim\src\Main.cpp(223,21): warning C4244: 'initializing': conversion from 'float' to 'int', possible loss of data
+C:\Users\JTSte\source\repos\FluidSim\FluidSim\src\Main.cpp(224,21): warning C4244: 'initializing': conversion from 'float' to 'int', possible loss of data
+C:\Users\JTSte\source\repos\FluidSim\FluidSim\src\Main.cpp(225,21): warning C4244: 'initializing': conversion from 'float' to 'int', possible loss of data
   FluidSim.vcxproj -> C:\Users\JTSte\source\repos\FluidSim\Debug\FluidSim.exe
