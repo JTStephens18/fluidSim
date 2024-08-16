@@ -8,11 +8,13 @@ void processInput(GLFWwindow* window);
 void mouse_button_callback(GLFWwindow* window, int button, int action, int mods);
 void cursor_position_callback(GLFWwindow* window, double xpos, double ypos);
 
+int SCREEN_WIDTH = 256;
+int SCREEN_HEIGHT = 256;
 
 float rectX = -1.0f;
 float rectY = -1.0f;
-float rectWidth = 1.0f;
-float rectHeight = 1.0f;
+float rectWidth = 5.0f;
+float rectHeight = 5.0f;
 bool isDragging = false;
 
 float vertices[] = {
@@ -77,12 +79,18 @@ int N = 64;
 int iter = 4;
 
 int IX(int x, int y) {
-    return ((x)+N * (y));
+    int xLimit = std::min(std::max(x, 0), N-1);
+    int yLimit = std::min(std::max(y, 0), N-1);
+    int index = xLimit + yLimit * N;
+    return index;
 };
 
-struct fluidGrid {
+struct fluidGridType {
 
     int N;
+    float visc;
+    float dt;
+    float diff;
 
     std::vector<float> Vx;
     std::vector<float> Vy;
@@ -94,9 +102,12 @@ struct fluidGrid {
     std::vector<float> s;
 };
 
-fluidGrid fluidGridCreate() {
-    fluidGrid newGrid;
+fluidGridType fluidGridCreate() {
+    fluidGridType newGrid;
     newGrid.N = N;
+    newGrid.dt = 0.1;
+    newGrid.diff = 0;
+    newGrid.visc = 0;
     int gridSize = newGrid.N * newGrid.N;
     newGrid.Vx.assign(gridSize, 0.0);
     newGrid.Vy.assign(gridSize, 0.0);
@@ -107,17 +118,17 @@ fluidGrid fluidGridCreate() {
     return newGrid;
 };
 
-void addDensity(fluidGrid* grid, int x, int y, float amount) {
+void addDensity(fluidGridType* grid, int x, int y, float amount) {
     grid->density[IX(x, y)] += amount;
 };
 
-void addVelocity(fluidGrid* grid, int x, int y, float amountX, float amountY) {
+void addVelocity(fluidGridType* grid, int x, int y, float amountX, float amountY) {
     int index = IX(x, y);
     grid->Vx[index] += amountX;
     grid->Vy[index] += amountY;
 };
 
-static void set_bnd(int b, float* x) {
+static void set_bnd(int b, std::vector<float> x) {
     for (int i = 1; i < N - 1; i++) {
         x[IX(i, 0)] = b == 2 ? -x[IX(i, 1)] : x[IX(i, 1)];
         x[IX(i, N - 1)] = b == 2 ? -x[IX(i, N - 2)] : x[IX(i, N - 2)];
@@ -145,24 +156,24 @@ static void set_bnd(int b, float* x) {
         + x[IX(N - 1, N - 1)]);
 };
 
-static void lin_solve(int b, float* x, float* x0, float a, float c) {
+static void lin_solve(int b, std::vector<float> x, std::vector<float> x0, float a, float c) {
     float cRecip = 1.0 / c;
     for (int k = 0; k < iter; k++) {
-        for (int j = 1; j < N; j++) {
-            for (int i = 1; i < N; i++) {
-                x[IX(i, j)] = (x0[IX(i, j)] + a * (x[IX(i + 1, j)] + x[IX(i - 1, j)], +x[IX(i, j + 1)], +x[IX(i, j - 1)])) * cRecip;
+        for (int j = 1; j < N - 1; j++) {
+            for (int i = 1; i < N - 1; i++) {
+                x[IX(i, j)] = (x0[IX(i, j)] + a * (x[IX(i + 1, j)] + x[IX(i - 1, j)] + x[IX(i, j + 1)] + x[IX(i, j - 1)])) * cRecip;
             }
         }
         set_bnd(b, x);
     }
 };
 
-static void diffuse(int b, float* x, float* x0, float diff, float dt) {
+static void diffuse(int b, std::vector<float> x, std::vector<float> x0, float diff, float dt) {
     float a = dt * diff * (N - 2) * (N - 2);
     lin_solve(b, x, x0, a, 1 + 4 * a);
 };
 
-static void project(float* velocX, float* velocY, float* p, float* div) {
+static void project(std::vector<float> velocX, std::vector<float> velocY, std::vector<float> p, std::vector<float> div) {
     for (int j = 1; j < N - 1; j++) {
         for (int i = 1; i < N - 1; i++) {
             div[IX(i, j)] = -0.5f * (
@@ -186,7 +197,7 @@ static void project(float* velocX, float* velocY, float* p, float* div) {
     set_bnd(2, velocY);
 };
 
-static void advect(int b, float* d, float* d0, float* velocX, float* velocY, float dt) {
+static void advect(int b, std::vector<float> d, std::vector<float> d0, std::vector<float> velocX, std::vector<float> velocY, float dt) {
     float i0, i1, j0, j1;
     float dtx = dt * (N - 2);
     float dty = dt * (N - 2);
@@ -233,13 +244,44 @@ static void advect(int b, float* d, float* d0, float* velocX, float* velocY, flo
     set_bnd(b, d);
 };
 
+void step(fluidGridType* grid) {
+    float visc = grid->visc;
+    float diff = grid->diff;
+    float dt = grid->dt;
+
+    std::vector<float> Vx = grid->Vx;
+    std::vector<float> Vy = grid->Vy;
+    std::vector<float> Vx0 = grid->Vx0;
+    std::vector<float> Vy0 = grid->Vy0;
+
+    std::vector<float> s = grid->s;
+    std::vector<float> density = grid->density;
+
+    diffuse(1, Vx0, Vx, visc, dt);
+    diffuse(2, Vy0, Vy, visc, dt);
+
+    project(Vx0, Vy0, Vx, Vy);
+
+    advect(1, Vx, Vx0, Vx0, Vy0, dt);
+    advect(2, Vy, Vy0, Vx0, Vy0, dt);
+
+    project(Vx, Vy, Vx0, Vy0);
+
+    diffuse(0, s, density, diff, dt);
+    advect(0, density, s, Vx, Vy, dt);
+};
+
+
+void draw(fluidGridType* grid) {
+    step(grid);
+    glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
+}
+
 
 int main(void)
 
 {
-    fluidGrid fluidGrid = fluidGridCreate();
-
-
+    fluidGridType fluidGrid = fluidGridCreate();
 
     GLFWwindow* window;
 
@@ -252,7 +294,7 @@ int main(void)
     glfwCreateWindow takes in width, height, name
         returns a GLFWwindow object
     */
-    window = glfwCreateWindow(640, 480, "Hello World Triangle", NULL, NULL);
+    window = glfwCreateWindow(SCREEN_WIDTH, SCREEN_HEIGHT, "Hello World Triangle", NULL, NULL);
     if (!window)
     {
         std::cout << "Failed to create GLFW Window" << std::endl;
@@ -268,6 +310,9 @@ int main(void)
         std::cout << "Error initializing GLEW" << std::endl;
         return -1;
     }
+
+    glfwSetWindowUserPointer(window, &fluidGrid);
+
     /* We register callback functions after creating the window, but before the render loop */
     glfwSetFramebufferSizeCallback(window, framebuffer_size_callback);
     glfwSetMouseButtonCallback(window, mouse_button_callback);
@@ -345,12 +390,13 @@ int main(void)
 
     //glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 
-
     /* Loop until the user closes the window */
     while (!glfwWindowShouldClose(window))
     {
 
         processInput(window);
+
+        //draw(&fluidGrid);
 
         /* Render here */
         glClear(GL_COLOR_BUFFER_BIT);
@@ -366,7 +412,9 @@ int main(void)
         //glDrawArrays(GL_TRIANGLES, 0, 3);
         //glDrawArrays(GL_TRIANGLES, 3, 6);
 
-        glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
+        draw(&fluidGrid);
+
+        //glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
 
         //glUseProgram(program2);
 
@@ -423,6 +471,9 @@ void cursor_position_callback(GLFWwindow* window, double xpos, double ypos)
     {
         // Convert mouse position to OpenGL coordinates
         rectX = (float)xpos;
-        rectY = 640 - (float)ypos; // Invert Y axis to match OpenGL coordinates
+        rectY = SCREEN_HEIGHT - (float)ypos; // Invert Y axis to match OpenGL coordinates
+        fluidGridType* fluidGrid = static_cast<fluidGridType*>(glfwGetWindowUserPointer(window));
+
+        addDensity(fluidGrid, rectX, rectY, 100);
     }
 }
