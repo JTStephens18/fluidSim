@@ -163,8 +163,8 @@ uniform sampler2D densityTexture;
 void main()
 {
 vec4 texColor = texture(densityTexture, TexCoord);
-FragColor = texColor;
-//FragColor = vec4(texColor.rgb, 1.0);
+//FragColor = texColor;
+FragColor = vec4(texColor.rgb, 1.0);
 }
     )";
 
@@ -372,11 +372,12 @@ void draw(fluidGridType* grid, unsigned int texture) {
 
     for (int i = 0; i < N; i++) {
         for (int j = 0; j < N; j++) {
-            textureData[IX(i, j)] = 255;  // R
-            textureData[IX(i, j) + 1] = 255;  // G
-            textureData[IX(i, j) + 2] = 255;  // B
-            textureData[IX(i, j) + 3] = static_cast<unsigned char>(grid->density[IX(i, j)]);
+            textureData[IX(i, j)] = 255.0;  // R
+            textureData[IX(i, j) + 1] = 255.0;  // G
+            textureData[IX(i, j) + 2] = 255.0;  // B
+            textureData[IX(i, j) + 3] = (grid->density[IX(i, j)]);
             if (grid->density[IX(i, j)] != 0) {
+                std::cout << "val " << (grid->density[IX(i, j)]) << std::endl;
                // std::cout << "Index " << IX(i, j) << std::endl;
                // std::cout << "grid density " << grid->density[IX(i, j)] << std::endl;
             }
@@ -384,8 +385,14 @@ void draw(fluidGridType* grid, unsigned int texture) {
     }
 
     glBindTexture(GL_TEXTURE_2D, texture);
-    glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, N, N, GL_RGBA, GL_UNSIGNED_BYTE, textureData.data());
-    glBindTexture(GL_TEXTURE_2D, 0);
+    glTexSubImage2D(GL_TEXTURE_2D, 0, rectX, rectY, N, N, GL_RGBA, GL_UNSIGNED_BYTE, textureData.data());
+    //glBindTexture(GL_TEXTURE_2D, texture);
+
+    std::cout << "First pixel RGBA: "
+        << (int)textureData[0] << ", "
+        << (int)textureData[1] << ", "
+        << (int)textureData[2] << ", "
+        << (int)textureData[3] << std::endl;
 }
 
 
@@ -546,7 +553,9 @@ int main(void)
     glGenTextures(1, &texture);
     glBindTexture(GL_TEXTURE_2D, texture);
 
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, N, N, 0, GL_RGBA, GL_UNSIGNED_BYTE, NULL);
+    const void* dataPtr = static_cast<const void*>(fluidGrid.density.data());
+
+    //glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, N, N, 0, GL_RGBA, GL_UNSIGNED_BYTE, dataPtr);
 
     // set the texture wrapping/filtering options (on currently bound texture)
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
@@ -557,13 +566,14 @@ int main(void)
     int width, height, nrChannels;
     unsigned char* data = stbi_load("C:/Users/JTSte/Downloads/white_img.jpg", &width, &height,
         &nrChannels, 0);
-    if (!data)
+    if (data)
     {
-        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB,
+        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA,
             GL_UNSIGNED_BYTE, data);
         glGenerateMipmap(GL_TEXTURE_2D);
     }
 
+    stbi_image_free(data);
 
     //int n = fluidGrid.density.size();
     //float* densityData = new float[n];
@@ -585,6 +595,7 @@ int main(void)
     //glBindVertexArray(0);
 
     //glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+
 
     /* Loop until the user closes the window */
     while (!glfwWindowShouldClose(window))
@@ -635,6 +646,11 @@ int main(void)
         /* Poll for and process events (such as inputs) */
         glfwPollEvents();
     }
+
+    glDeleteVertexArrays(1, &VAO);
+    glDeleteBuffers(1, &VBO);
+    glDeleteBuffers(1, &EBO);
+
     /* Clean all of GLFW's resources */
     glfwTerminate();
     return 0;
@@ -676,6 +692,6 @@ void cursor_position_callback(GLFWwindow* window, double xpos, double ypos)
         rectY = SCREEN_HEIGHT - (float)ypos; // Invert Y axis to match OpenGL coordinates
         fluidGridType* fluidGrid = static_cast<fluidGridType*>(glfwGetWindowUserPointer(window));
         std::cout << "rect x adn y " << rectX << " " << rectY << " " << std::endl;
-        addDensity(fluidGrid, rectX, rectY, 1.0);
+        addDensity(fluidGrid, rectX, rectY, -50.0);
     }
 }

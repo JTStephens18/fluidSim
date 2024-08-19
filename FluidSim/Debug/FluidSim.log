@@ -6,6 +6,32 @@ C:\Users\JTSte\source\repos\FluidSim\FluidSim\src\Main.cpp(326,21): warning C424
 C:\Users\JTSte\source\repos\FluidSim\FluidSim\src\Main.cpp(327,21): warning C4244: 'initializing': conversion from 'float' to 'int', possible loss of data
 C:\Users\JTSte\source\repos\FluidSim\FluidSim\src\Main.cpp(328,21): warning C4244: 'initializing': conversion from 'float' to 'int', possible loss of data
 C:\Users\JTSte\source\repos\FluidSim\FluidSim\src\Main.cpp(329,21): warning C4244: 'initializing': conversion from 'float' to 'int', possible loss of data
-C:\Users\JTSte\source\repos\FluidSim\FluidSim\src\Main.cpp(679,38): warning C4244: 'argument': conversion from 'float' to 'int', possible loss of data
-C:\Users\JTSte\source\repos\FluidSim\FluidSim\src\Main.cpp(679,31): warning C4244: 'argument': conversion from 'float' to 'int', possible loss of data
+C:\Users\JTSte\source\repos\FluidSim\FluidSim\src\Main.cpp(375,37): warning C4244: '=': conversion from 'double' to '_Ty', possible loss of data
+C:\Users\JTSte\source\repos\FluidSim\FluidSim\src\Main.cpp(375,37): warning C4244:         with
+C:\Users\JTSte\source\repos\FluidSim\FluidSim\src\Main.cpp(375,37): warning C4244:         [
+C:\Users\JTSte\source\repos\FluidSim\FluidSim\src\Main.cpp(375,37): warning C4244:             _Ty=unsigned char
+C:\Users\JTSte\source\repos\FluidSim\FluidSim\src\Main.cpp(375,37): warning C4244:         ]
+C:\Users\JTSte\source\repos\FluidSim\FluidSim\src\Main.cpp(376,41): warning C4244: '=': conversion from 'double' to '_Ty', possible loss of data
+C:\Users\JTSte\source\repos\FluidSim\FluidSim\src\Main.cpp(376,41): warning C4244:         with
+C:\Users\JTSte\source\repos\FluidSim\FluidSim\src\Main.cpp(376,41): warning C4244:         [
+C:\Users\JTSte\source\repos\FluidSim\FluidSim\src\Main.cpp(376,41): warning C4244:             _Ty=unsigned char
+C:\Users\JTSte\source\repos\FluidSim\FluidSim\src\Main.cpp(376,41): warning C4244:         ]
+C:\Users\JTSte\source\repos\FluidSim\FluidSim\src\Main.cpp(377,41): warning C4244: '=': conversion from 'double' to '_Ty', possible loss of data
+C:\Users\JTSte\source\repos\FluidSim\FluidSim\src\Main.cpp(377,41): warning C4244:         with
+C:\Users\JTSte\source\repos\FluidSim\FluidSim\src\Main.cpp(377,41): warning C4244:         [
+C:\Users\JTSte\source\repos\FluidSim\FluidSim\src\Main.cpp(377,41): warning C4244:             _Ty=unsigned char
+C:\Users\JTSte\source\repos\FluidSim\FluidSim\src\Main.cpp(377,41): warning C4244:         ]
+C:\Users\JTSte\source\repos\FluidSim\FluidSim\src\Main.cpp(378,64): warning C4244: '=': conversion from '_Ty' to '_Ty', possible loss of data
+C:\Users\JTSte\source\repos\FluidSim\FluidSim\src\Main.cpp(378,64): warning C4244:         with
+C:\Users\JTSte\source\repos\FluidSim\FluidSim\src\Main.cpp(378,64): warning C4244:         [
+C:\Users\JTSte\source\repos\FluidSim\FluidSim\src\Main.cpp(378,64): warning C4244:             _Ty=float
+C:\Users\JTSte\source\repos\FluidSim\FluidSim\src\Main.cpp(378,64): warning C4244:         ]
+C:\Users\JTSte\source\repos\FluidSim\FluidSim\src\Main.cpp(378,64): warning C4244:         and
+C:\Users\JTSte\source\repos\FluidSim\FluidSim\src\Main.cpp(378,64): warning C4244:         [
+C:\Users\JTSte\source\repos\FluidSim\FluidSim\src\Main.cpp(378,64): warning C4244:             _Ty=unsigned char
+C:\Users\JTSte\source\repos\FluidSim\FluidSim\src\Main.cpp(378,64): warning C4244:         ]
+C:\Users\JTSte\source\repos\FluidSim\FluidSim\src\Main.cpp(388,46): warning C4244: 'argument': conversion from 'float' to 'GLint', possible loss of data
+C:\Users\JTSte\source\repos\FluidSim\FluidSim\src\Main.cpp(388,39): warning C4244: 'argument': conversion from 'float' to 'GLint', possible loss of data
+C:\Users\JTSte\source\repos\FluidSim\FluidSim\src\Main.cpp(695,38): warning C4244: 'argument': conversion from 'float' to 'int', possible loss of data
+C:\Users\JTSte\source\repos\FluidSim\FluidSim\src\Main.cpp(695,31): warning C4244: 'argument': conversion from 'float' to 'int', possible loss of data
   FluidSim.vcxproj -> C:\Users\JTSte\source\repos\FluidSim\Debug\FluidSim.exe
