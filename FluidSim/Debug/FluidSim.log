@@ -1,11 +1,11 @@
 ﻿  Main.cpp
-C:\Users\JTSte\source\repos\FluidSim\FluidSim\src\Main.cpp(108,18): warning C4305: '=': truncation from 'double' to 'float'
-C:\Users\JTSte\source\repos\FluidSim\FluidSim\src\Main.cpp(160,18): warning C4244: 'initializing': conversion from 'double' to 'float', possible loss of data
-C:\Users\JTSte\source\repos\FluidSim\FluidSim\src\Main.cpp(208,18): warning C4244: 'initializing': conversion from 'int' to 'float', possible loss of data
-C:\Users\JTSte\source\repos\FluidSim\FluidSim\src\Main.cpp(233,21): warning C4244: 'initializing': conversion from 'float' to 'int', possible loss of data
-C:\Users\JTSte\source\repos\FluidSim\FluidSim\src\Main.cpp(234,21): warning C4244: 'initializing': conversion from 'float' to 'int', possible loss of data
-C:\Users\JTSte\source\repos\FluidSim\FluidSim\src\Main.cpp(235,21): warning C4244: 'initializing': conversion from 'float' to 'int', possible loss of data
-C:\Users\JTSte\source\repos\FluidSim\FluidSim\src\Main.cpp(236,21): warning C4244: 'initializing': conversion from 'float' to 'int', possible loss of data
-C:\Users\JTSte\source\repos\FluidSim\FluidSim\src\Main.cpp(477,38): warning C4244: 'argument': conversion from 'float' to 'int', possible loss of data
-C:\Users\JTSte\source\repos\FluidSim\FluidSim\src\Main.cpp(477,31): warning C4244: 'argument': conversion from 'float' to 'int', possible loss of data
+C:\Users\JTSte\source\repos\FluidSim\FluidSim\src\Main.cpp(201,18): warning C4305: '=': truncation from 'double' to 'float'
+C:\Users\JTSte\source\repos\FluidSim\FluidSim\src\Main.cpp(253,18): warning C4244: 'initializing': conversion from 'double' to 'float', possible loss of data
+C:\Users\JTSte\source\repos\FluidSim\FluidSim\src\Main.cpp(301,18): warning C4244: 'initializing': conversion from 'int' to 'float', possible loss of data
+C:\Users\JTSte\source\repos\FluidSim\FluidSim\src\Main.cpp(326,21): warning C4244: 'initializing': conversion from 'float' to 'int', possible loss of data
+C:\Users\JTSte\source\repos\FluidSim\FluidSim\src\Main.cpp(327,21): warning C4244: 'initializing': conversion from 'float' to 'int', possible loss of data
+C:\Users\JTSte\source\repos\FluidSim\FluidSim\src\Main.cpp(328,21): warning C4244: 'initializing': conversion from 'float' to 'int', possible loss of data
+C:\Users\JTSte\source\repos\FluidSim\FluidSim\src\Main.cpp(329,21): warning C4244: 'initializing': conversion from 'float' to 'int', possible loss of data
+C:\Users\JTSte\source\repos\FluidSim\FluidSim\src\Main.cpp(679,38): warning C4244: 'argument': conversion from 'float' to 'int', possible loss of data
+C:\Users\JTSte\source\repos\FluidSim\FluidSim\src\Main.cpp(679,31): warning C4244: 'argument': conversion from 'float' to 'int', possible loss of data
   FluidSim.vcxproj -> C:\Users\JTSte\source\repos\FluidSim\Debug\FluidSim.exe

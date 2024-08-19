@@ -1,23 +1,25 @@
 #include <GL/glew.h>
 #include <GLFW/glfw3.h>
+#include <glm/glm.hpp>
 #include <iostream>
 #include <vector>
+#include "stb/stb_image.h"
 
 void framebuffer_size_callback(GLFWwindow* window, int width, int height);
 void processInput(GLFWwindow* window);
 void mouse_button_callback(GLFWwindow* window, int button, int action, int mods);
 void cursor_position_callback(GLFWwindow* window, double xpos, double ypos);
 
-int SCREEN_WIDTH = 256;
-int SCREEN_HEIGHT = 256;
+int SCREEN_WIDTH = 64;
+int SCREEN_HEIGHT = 64;
 
 float rectX = -1.0f;
 float rectY = -1.0f;
-float rectWidth = 5.0f;
-float rectHeight = 5.0f;
+float rectWidth = 50.0f;
+float rectHeight = 50.0f;
 bool isDragging = false;
 
-float vertices[] = {
+float verticess[] = {
     0.0f, 0.0f, // Bottom-left corner
     1.0f, 0.0f, // Bottom-right corner
     1.0f, 1.0f, // Top-right corner
@@ -25,7 +27,7 @@ float vertices[] = {
 };
 
 // Indices for the rectangle (two triangles)
-unsigned int indices[] = {
+unsigned int indicess[] = {
     0, 1, 2,   // First triangle
     2, 3, 0    // Second triangle
 };
@@ -37,7 +39,7 @@ static const char* vertexShaderSource1 = "#version 460 core\n"
 "gl_Position = vec4(aPos.x, aPos.y, aPos.z, 1.0);\n"
 "}\0";
 
-static const char* vertexShaderSource = R"(
+static const char* vertexShaderSources = R"(
         #version 330 core
         layout (location = 0) in vec2 aPos;
 
@@ -50,6 +52,52 @@ static const char* vertexShaderSource = R"(
             vec2 ndcPos = (pos / uScreenSize) * 2.0 - 1.0;
             gl_Position = vec4(ndcPos, 0.0, 1.0);
         }
+    )";
+
+
+static const char* vertexShaderSource_1 = R"(
+layout (location = 0) in vec2 aPos;
+layout (location = 1) in vec3 aColor;
+
+out vec3 ourColor;
+
+uniform mat4 model;
+uniform mat4 view;
+uniform mat4 projection;
+
+void main()
+{
+    gl_Position = projection * view * model * vec4(aPos, 1.0, 1.0);
+    ourColor = aColor;
+}
+    )";
+
+static const char* vertexShaderSource_2 = R"(
+#version 330 core
+layout (location = 0) in vec3 aPos;
+layout (location = 1) in vec3 aColor;
+layout (location = 2) in vec2 aTexCoord;
+out vec3 ourColor;
+out vec2 TexCoord;
+void main()
+{
+gl_Position = vec4(aPos, 1.0);
+ourColor = aColor;
+TexCoord = aTexCoord;
+}
+    )";
+
+static const char* vertexShaderSource = R"(
+#version 330 core
+layout (location = 0) in vec3 aPos;
+layout (location = 2) in vec2 aTexCoord;
+
+out vec2 TexCoord;
+void main()
+{
+gl_Position = vec4(aPos, 1.0);
+TexCoord = aTexCoord;
+}
     )";
 
 static const char* fragmentShaderSource1 = "#version 460 core\n"
@@ -66,13 +114,58 @@ static const char* fragmentShaderSource2 = "#version 460 core\n"
 "FragColor = vec4(1.0f, 1.0f, 0.0f, 1.0f);\n"
 "}\0";
 
-static const char* fragmentShaderSource = R"(
+static const char* fragmentShaderSource_1 = R"(
         #version 330 core
-        out vec4 FragColor;
+        
+        uniform float uOpacity;
+        uniform sampler2D gridTexture;
 
+        out vec4 FragColor;
+       
         void main() {
-            FragColor = vec4(1.0, 1.0, 1.0, 1.0); // White color
+            FragColor = vec4(1.0, 1.0, 1.0, uOpacity); // White color
         }
+    )";
+
+static const char* fragmentShaderSource_2 = R"(
+#version 330 core
+out vec4 FragColor;
+in vec3 ourColor;
+in vec2 TexCoord;
+uniform sampler2D ourTexture;
+void main()
+{
+FragColor = texture(ourTexture, TexCoord);
+}
+    )";
+
+
+static const char* fragmentShaderSource_3 = R"(
+#version 330 core
+out vec4 FragColor;
+in vec3 ourColor;
+in vec2 TexCoord;
+uniform sampler2D densityTexture;
+void main()
+{
+//float density = texture(densityTexture, TexCoord);
+//FragColor = vec4(1.0, 1.0, 1.0, density);
+FragColor = texture(densityTexture, TexCoord);
+}
+    )";
+
+static const char* fragmentShaderSource = R"(
+#version 330 core
+out vec4 FragColor;
+
+in vec2 TexCoord;
+uniform sampler2D densityTexture;
+void main()
+{
+vec4 texColor = texture(densityTexture, TexCoord);
+FragColor = texColor;
+//FragColor = vec4(texColor.rgb, 1.0);
+}
     )";
 
 int N = 64;
@@ -272,9 +365,27 @@ void step(fluidGridType* grid) {
 };
 
 
-void draw(fluidGridType* grid) {
+void draw(fluidGridType* grid, unsigned int texture) {
     step(grid);
-    glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
+
+    std::vector<unsigned char> textureData(N * N * 4);
+
+    for (int i = 0; i < N; i++) {
+        for (int j = 0; j < N; j++) {
+            textureData[IX(i, j)] = 255;  // R
+            textureData[IX(i, j) + 1] = 255;  // G
+            textureData[IX(i, j) + 2] = 255;  // B
+            textureData[IX(i, j) + 3] = static_cast<unsigned char>(grid->density[IX(i, j)]);
+            if (grid->density[IX(i, j)] != 0) {
+               // std::cout << "Index " << IX(i, j) << std::endl;
+               // std::cout << "grid density " << grid->density[IX(i, j)] << std::endl;
+            }
+        }
+    }
+
+    glBindTexture(GL_TEXTURE_2D, texture);
+    glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, N, N, GL_RGBA, GL_UNSIGNED_BYTE, textureData.data());
+    glBindTexture(GL_TEXTURE_2D, 0);
 }
 
 
@@ -318,19 +429,38 @@ int main(void)
     glfwSetMouseButtonCallback(window, mouse_button_callback);
     glfwSetCursorPosCallback(window, cursor_position_callback);
 
+    int success;
+    char infoLog[512];
+
     unsigned int vertexShader;
     vertexShader = glCreateShader(GL_VERTEX_SHADER);
     glShaderSource(vertexShader, 1, &vertexShaderSource, NULL);
     glCompileShader(vertexShader);
+
+    glGetShaderiv(vertexShader, GL_COMPILE_STATUS, &success);
+
+    if (!success)
+    {
+        glGetShaderInfoLog(vertexShader, 512, NULL, infoLog);
+        std::cout << "ERROR::SHADER::VERTEX::COMPILATION_FAILED\n" <<
+            infoLog << std::endl;
+    }
 
     unsigned int fragmentShader;
     fragmentShader = glCreateShader(GL_FRAGMENT_SHADER);
     glShaderSource(fragmentShader, 1, &fragmentShaderSource, NULL);
     glCompileShader(fragmentShader);
 
-    int success;
-    char infoLog[512];
-    //glGetShaderiv(fragmentShader, GL_COMPILE_STATUS, &success);
+    //int success;
+    //char infoLog[512];
+    glGetShaderiv(fragmentShader, GL_COMPILE_STATUS, &success);
+
+    if (!success)
+    {
+        glGetShaderInfoLog(vertexShader, 512, NULL, infoLog);
+        std::cout << "ERROR::SHADER::FRAGMENT::COMPILATION_FAILED\n" <<
+            infoLog << std::endl;
+    }
 
     unsigned int shaderProgram;
     shaderProgram = glCreateProgram();
@@ -344,7 +474,7 @@ int main(void)
     if (!success)
     {
         glGetShaderInfoLog(vertexShader, 512, NULL, infoLog);
-        std::cout << "ERROR::SHADER::VERTEX::COMPILATION_FAILED\n" <<
+        std::cout << "ERROR::SHADER::PROGRAM::COMPILATION_FAILED\n" <<
             infoLog << std::endl;
     }
 
@@ -364,6 +494,19 @@ int main(void)
         -0.0f, 0.5f, 0.0f,
     };
 
+    float vertices[] = {
+        // positions // colors // texture coords
+        0.5f, 0.5f, 0.0f, 1.0f, 0.0f, 0.0f, 1.0f, 1.0f, // top right
+        0.5f, -0.5f, 0.0f, 0.0f, 1.0f, 0.0f, 1.0f, 0.0f, // bottom right
+        -0.5f, -0.5f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f, // bottom left
+        -0.5f, 0.5f, 0.0f, 1.0f, 1.0f, 0.0f, 0.0f, 1.0f // top left
+    };
+
+    unsigned int indices[] = {
+    0, 1, 3, // first triangle
+    1, 2, 3  // second triangle
+    };
+
     unsigned int VBO, VAO, EBO;
     /* A vertex array object (VAO) can be bound like a vertex buffer object. It has the advantage of storting vertex attribute pointers (such as vertex shaders) so we only have to make the calls once */
     glGenVertexArrays(1, &VAO);
@@ -378,8 +521,61 @@ int main(void)
     glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
 
     //glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
-    glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 2 * sizeof(float), (void*)0);
+
+
+    //glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 2 * sizeof(float), (void*)0);
+    //glEnableVertexAttribArray(0);
+
+    // position attribute
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)0);
     glEnableVertexAttribArray(0);
+    // color attribute
+    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(3 * sizeof(float)));
+    glEnableVertexAttribArray(1);
+
+
+    glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*) (6 * sizeof(float)));
+    glEnableVertexAttribArray(2);
+
+    //glEnable(GL_BLEND);
+   // glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
+
+    stbi_set_flip_vertically_on_load(true);
+    unsigned int texture;
+    glGenTextures(1, &texture);
+    glBindTexture(GL_TEXTURE_2D, texture);
+
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, N, N, 0, GL_RGBA, GL_UNSIGNED_BYTE, NULL);
+
+    // set the texture wrapping/filtering options (on currently bound texture)
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    // load and generate the texture
+    int width, height, nrChannels;
+    unsigned char* data = stbi_load("C:/Users/JTSte/Downloads/white_img.jpg", &width, &height,
+        &nrChannels, 0);
+    if (!data)
+    {
+        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB,
+            GL_UNSIGNED_BYTE, data);
+        glGenerateMipmap(GL_TEXTURE_2D);
+    }
+
+
+    //int n = fluidGrid.density.size();
+    //float* densityData = new float[n];
+
+    // Step 3: Use std::copy to copy the elements
+    //std::copy(fluidGrid.density.begin(), fluidGrid.density.end(), densityData);
+
+    //glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, N, N, GL_RED, GL_FLOAT, densityData);
+
+    //glActiveTexture(GL_TEXTURE0);
+    //glBindTexture(GL_TEXTURE_2D, texture);
+    //glUniform1i(glGetUniformLocation(shaderProgram, "densityTexture"), 0);
 
 
     //glBindBuffer(GL_ARRAY_BUFFER, 0);
@@ -396,25 +592,31 @@ int main(void)
 
         processInput(window);
 
-        //draw(&fluidGrid);
+        draw(&fluidGrid, texture);
 
         /* Render here */
         glClear(GL_COLOR_BUFFER_BIT);
 
+        glActiveTexture(GL_TEXTURE0);
+
+        glBindTexture(GL_TEXTURE_2D, texture);
+
+
         glUseProgram(shaderProgram);
 
         // Set the uniform variables
-        glUniform2f(glGetUniformLocation(shaderProgram, "uScreenSize"), 640, 480);
-        glUniform2f(glGetUniformLocation(shaderProgram, "uPosition"), rectX, rectY);
-        glUniform2f(glGetUniformLocation(shaderProgram, "uSize"), rectWidth, rectHeight);
+        //glUniform2f(glGetUniformLocation(shaderProgram, "uScreenSize"), 640, 480);
+        //glUniform2f(glGetUniformLocation(shaderProgram, "uPosition"), rectX, rectY);
+        //glUniform2f(glGetUniformLocation(shaderProgram, "uSize"), rectWidth, rectHeight);
 
         glBindVertexArray(VAO);
+
+        glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
+
         //glDrawArrays(GL_TRIANGLES, 0, 3);
         //glDrawArrays(GL_TRIANGLES, 3, 6);
 
-        draw(&fluidGrid);
-
-        //glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
+        //draw(&fluidGrid, shaderProgram);
 
         //glUseProgram(program2);
 
@@ -473,7 +675,7 @@ void cursor_position_callback(GLFWwindow* window, double xpos, double ypos)
         rectX = (float)xpos;
         rectY = SCREEN_HEIGHT - (float)ypos; // Invert Y axis to match OpenGL coordinates
         fluidGridType* fluidGrid = static_cast<fluidGridType*>(glfwGetWindowUserPointer(window));
-
-        addDensity(fluidGrid, rectX, rectY, 100);
+        std::cout << "rect x adn y " << rectX << " " << rectY << " " << std::endl;
+        addDensity(fluidGrid, rectX, rectY, 1.0);
     }
 }
