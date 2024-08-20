@@ -15,8 +15,8 @@ int SCREEN_HEIGHT = 64;
 
 float rectX = -1.0f;
 float rectY = -1.0f;
-float rectWidth = 50.0f;
-float rectHeight = 50.0f;
+float rectWidth = 1.0f;
+float rectHeight = 1.0f;
 bool isDragging = false;
 
 float verticess[] = {
@@ -163,8 +163,8 @@ uniform sampler2D densityTexture;
 void main()
 {
 vec4 texColor = texture(densityTexture, TexCoord);
-//FragColor = texColor;
-FragColor = vec4(texColor.rgb, 1.0);
+FragColor = texColor;
+//FragColor = vec4(texColor.rgb, 1.0);
 }
     )";
 
@@ -177,6 +177,10 @@ int IX(int x, int y) {
     int index = xLimit + yLimit * N;
     return index;
 };
+
+float clamp(float input, float lower, float upper) {
+    return std::min(std::max(input, lower), upper - 1);
+}
 
 struct fluidGridType {
 
@@ -366,33 +370,30 @@ void step(fluidGridType* grid) {
 
 
 void draw(fluidGridType* grid, unsigned int texture) {
-    step(grid);
+    //step(grid);
 
     std::vector<unsigned char> textureData(N * N * 4);
 
     for (int i = 0; i < N; i++) {
         for (int j = 0; j < N; j++) {
-            textureData[IX(i, j)] = 255.0;  // R
-            textureData[IX(i, j) + 1] = 255.0;  // G
-            textureData[IX(i, j) + 2] = 255.0;  // B
-            textureData[IX(i, j) + 3] = (grid->density[IX(i, j)]);
-            if (grid->density[IX(i, j)] != 0) {
-                std::cout << "val " << (grid->density[IX(i, j)]) << std::endl;
-               // std::cout << "Index " << IX(i, j) << std::endl;
-               // std::cout << "grid density " << grid->density[IX(i, j)] << std::endl;
-            }
+            textureData[4 * IX(i, j)] = 255.0;  // R
+            textureData[4 * IX(i, j) + 1] = 255.0;  // G
+            textureData[4 * IX(i, j) + 2] = 255.0;  // B
+            textureData[4 * IX(i, j) + 3] = grid->density[IX(i, j)];
+            //grid->density[IX(i, j)] += 5.0;
+            //std::cout << "grid density " << grid->density[IX(i, j)] << std::endl;
+            //textureData[IX(i, j) + 3] = (grid->density[IX(i, j)]);
+            //if (grid->density[IX(i, j)] != 0) {
+            //    std::cout << "val " << (grid->density[IX(i, j)]) << std::endl;
+            //   // std::cout << "Index " << IX(i, j) << std::endl;
+            //   // std::cout << "grid density " << grid->density[IX(i, j)] << std::endl;
+            //}
         }
     }
 
     glBindTexture(GL_TEXTURE_2D, texture);
-    glTexSubImage2D(GL_TEXTURE_2D, 0, rectX, rectY, N, N, GL_RGBA, GL_UNSIGNED_BYTE, textureData.data());
+    glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, N, N, GL_RGBA, GL_UNSIGNED_BYTE, textureData.data());
     //glBindTexture(GL_TEXTURE_2D, texture);
-
-    std::cout << "First pixel RGBA: "
-        << (int)textureData[0] << ", "
-        << (int)textureData[1] << ", "
-        << (int)textureData[2] << ", "
-        << (int)textureData[3] << std::endl;
 }
 
 
@@ -527,12 +528,6 @@ int main(void)
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
     glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
 
-    //glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
-
-
-    //glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 2 * sizeof(float), (void*)0);
-    //glEnableVertexAttribArray(0);
-
     // position attribute
     glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)0);
     glEnableVertexAttribArray(0);
@@ -544,8 +539,8 @@ int main(void)
     glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*) (6 * sizeof(float)));
     glEnableVertexAttribArray(2);
 
-    //glEnable(GL_BLEND);
-   // glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+    glEnable(GL_BLEND);
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
 
     stbi_set_flip_vertically_on_load(true);
@@ -568,31 +563,12 @@ int main(void)
         &nrChannels, 0);
     if (data)
     {
-        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA,
+        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, N, N, 0, GL_RGBA,
             GL_UNSIGNED_BYTE, data);
         glGenerateMipmap(GL_TEXTURE_2D);
     }
 
     stbi_image_free(data);
-
-    //int n = fluidGrid.density.size();
-    //float* densityData = new float[n];
-
-    // Step 3: Use std::copy to copy the elements
-    //std::copy(fluidGrid.density.begin(), fluidGrid.density.end(), densityData);
-
-    //glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, N, N, GL_RED, GL_FLOAT, densityData);
-
-    //glActiveTexture(GL_TEXTURE0);
-    //glBindTexture(GL_TEXTURE_2D, texture);
-    //glUniform1i(glGetUniformLocation(shaderProgram, "densityTexture"), 0);
-
-
-    //glBindBuffer(GL_ARRAY_BUFFER, 0);
-
-
-    // Unbind VAO
-    //glBindVertexArray(0);
 
     //glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 
@@ -690,8 +666,16 @@ void cursor_position_callback(GLFWwindow* window, double xpos, double ypos)
         // Convert mouse position to OpenGL coordinates
         rectX = (float)xpos;
         rectY = SCREEN_HEIGHT - (float)ypos; // Invert Y axis to match OpenGL coordinates
+
+        //float textureX = (rectX / SCREEN_WIDTH) * SCREEN_WIDTH;
+        //float textureY = (rectY / SCREEN_HEIGHT) * SCREEN_HEIGHT;
+
+        //// Update rectX and rectY to be within the bounds of the texture
+        //rectX = textureX;
+        //rectY = textureY;
         fluidGridType* fluidGrid = static_cast<fluidGridType*>(glfwGetWindowUserPointer(window));
         std::cout << "rect x adn y " << rectX << " " << rectY << " " << std::endl;
-        addDensity(fluidGrid, rectX, rectY, -50.0);
+        addDensity(fluidGrid, rectX, rectY, 100.0);
+        //addVelocity(fluidGrid, rectX, rectY, 5.0, 5.0);
     }
 }
