@@ -3,6 +3,7 @@
 #include <glm/glm.hpp>
 #include <iostream>
 #include <vector>
+#include <random>
 #include "stb/stb_image.h"
 
 void framebuffer_size_callback(GLFWwindow* window, int width, int height);
@@ -10,8 +11,8 @@ void processInput(GLFWwindow* window);
 void mouse_button_callback(GLFWwindow* window, int button, int action, int mods);
 void cursor_position_callback(GLFWwindow* window, double xpos, double ypos);
 
-int SCREEN_WIDTH = 64;
-int SCREEN_HEIGHT = 64;
+int SCREEN_WIDTH = 256;
+int SCREEN_HEIGHT = 256;
 
 float rectX = -1.0f;
 float rectY = -1.0f;
@@ -202,9 +203,9 @@ struct fluidGridType {
 fluidGridType fluidGridCreate() {
     fluidGridType newGrid;
     newGrid.N = N;
-    newGrid.dt = 0.1;
+    newGrid.dt = 0.2;
     newGrid.diff = 0;
-    newGrid.visc = 0;
+    newGrid.visc = 0.0000001;
     int gridSize = newGrid.N * newGrid.N;
     newGrid.Vx.assign(gridSize, 0.0);
     newGrid.Vy.assign(gridSize, 0.0);
@@ -236,21 +237,17 @@ static void set_bnd(int b, std::vector<float> x) {
         x[IX(N - 1, j)] = b == 1 ? -x[IX(N - 2, j)] : x[IX(N - 2, j)];
     }
 
-    x[IX(0, 0)] = 0.33f * (x[IX(1, 0)]
-        + x[IX(0, 1)]
-        + x[IX(0, 0)]);
+    x[IX(0, 0)] = 0.5f * (x[IX(1, 0)]
+        + x[IX(0, 1)]);
 
-    x[IX(0, N - 1)] = 0.33f * (x[IX(1, N - 1)]
-        + x[IX(0, N - 2)]
-        + x[IX(0, N - 1)]);
+    x[IX(0, N - 1)] = 0.5f * (x[IX(1, N - 1)]
+        + x[IX(0, N - 2)]);
 
-    x[IX(N - 1, 0)] = 0.33f * (x[IX(N - 2, 0)]
-        + x[IX(N - 1, 1)]
-        + x[IX(N - 1, 0)]);
+    x[IX(N - 1, 0)] = 0.5f * (x[IX(N - 2, 0)]
+        + x[IX(N - 1, 1)]);
 
-    x[IX(N - 1, N - 1)] = 0.33f * (x[IX(N - 2, N - 1)]
-        + x[IX(N - 1, N - 2)]
-        + x[IX(N - 1, N - 1)]);
+    x[IX(N - 1, N - 1)] = 0.5f * (x[IX(N - 2, N - 1)]
+        + x[IX(N - 1, N - 2)]);
 };
 
 static void lin_solve(int b, std::vector<float> x, std::vector<float> x0, float a, float c) {
@@ -281,12 +278,12 @@ static void project(std::vector<float> velocX, std::vector<float> velocY, std::v
     }
     set_bnd(0, div);
     set_bnd(0, p);
-    lin_solve(0, p, div, 1, 6);
+    lin_solve(0, p, div, 1, 4);
 
     for (int j = 1; j < N - 1; j++) {
         for (int i = 1; i < N - 1; i++) {
-            velocX[IX(i, j)] = -0.5f * (p[IX(i + 1, j)] - p[IX(i - 1, j)]) * N;
-            velocY[IX(i, j)] = -0.5f * (p[IX(i, j + 1)] - p[IX(i, j - 1)]) * N;
+            velocX[IX(i, j)] -= -0.5f * (p[IX(i + 1, j)] - p[IX(i - 1, j)]) * N;
+            velocY[IX(i, j)] -= 0.5f * (p[IX(i, j + 1)] - p[IX(i, j - 1)]) * N;
         }
     }
 
@@ -327,14 +324,18 @@ static void advect(int b, std::vector<float> d, std::vector<float> d0, std::vect
             t1 = y - j0;
             t0 = 1.0f - t1;
 
-            int i0i = i0;
-            int i1i = i1;
-            int j0i = j0;
-            int j1i = j1;
+            int i0i = int(i0);
+            int i1i = int(i1);
+            int j0i = int(j0);
+            int j1i = int(j1);
 
             d[IX(i, j)] =
                 s0 * (t0 * d0[IX(i0i, j0i)] + t1 * d0[IX(i0i, j1i)]) +
                 s1 * (t0 * d0[IX(i1i, j0i)] + t1 * d0[IX(i1i, j1i)]);
+
+            if (d[IX(i, j)] != 0) {
+                std::cout << "density advect " << d[IX(i, j)] << std::endl;
+            }
         }
     }
 
@@ -342,52 +343,65 @@ static void advect(int b, std::vector<float> d, std::vector<float> d0, std::vect
 };
 
 void step(fluidGridType* grid) {
-    float visc = grid->visc;
-    float diff = grid->diff;
-    float dt = grid->dt;
+    //float visc = grid->visc;
+    //float diff = grid->diff;
+    //float dt = grid->dt;
 
-    std::vector<float> Vx = grid->Vx;
-    std::vector<float> Vy = grid->Vy;
-    std::vector<float> Vx0 = grid->Vx0;
-    std::vector<float> Vy0 = grid->Vy0;
+    //std::vector<float> Vx = grid->Vx;
+    //std::vector<float> Vy = grid->Vy;
+    //std::vector<float> Vx0 = grid->Vx0;
+    //std::vector<float> Vy0 = grid->Vy0;
 
-    std::vector<float> s = grid->s;
-    std::vector<float> density = grid->density;
+    //std::vector<float> s = grid->s;
+    //std::vector<float> density = grid->density;
 
-    diffuse(1, Vx0, Vx, visc, dt);
-    diffuse(2, Vy0, Vy, visc, dt);
+    diffuse(1, grid->Vx0, grid->Vx, grid->visc, grid->dt);
+    diffuse(2, grid->Vy0, grid->Vy, grid->visc, grid->dt);
 
-    project(Vx0, Vy0, Vx, Vy);
+    project(grid->Vx0, grid->Vy0, grid->Vx, grid->Vy);
 
-    advect(1, Vx, Vx0, Vx0, Vy0, dt);
-    advect(2, Vy, Vy0, Vx0, Vy0, dt);
+    advect(1, grid->Vx, grid->Vx0, grid->Vx0, grid->Vy0, grid->dt);
+    advect(2, grid->Vy, grid->Vy0, grid->Vx0, grid->Vy0, grid->dt);
 
-    project(Vx, Vy, Vx0, Vy0);
+    project(grid->Vx, grid->Vy, grid->Vx0, grid->Vy0);
 
-    diffuse(0, s, density, diff, dt);
-    advect(0, density, s, Vx, Vy, dt);
+    diffuse(0, grid->s, grid->density, grid->diff, grid->dt);
+    advect(0, grid->density, grid->s, grid->Vx, grid->Vy, grid->dt);
 };
+
+void test(fluidGridType* grid) {
+    int min = 0;
+    int max = N;
+    std::random_device rd;
+    std::mt19937 gen(rd());
+    std::uniform_int_distribution<> distrib(min, max);
+    rectX = distrib(gen);
+    rectY = distrib(gen);
+    addDensity(grid, rectX, rectY, 150.0);
+    addVelocity(grid, rectX, rectY, 100.0, 100.0);
+}
 
 
 void draw(fluidGridType* grid, unsigned int texture) {
-    //step(grid);
+    step(grid);
+    //test(grid);
 
     std::vector<unsigned char> textureData(N * N * 4);
 
     for (int i = 0; i < N; i++) {
         for (int j = 0; j < N; j++) {
-            textureData[4 * IX(i, j)] = 255.0;  // R
-            textureData[4 * IX(i, j) + 1] = 255.0;  // G
-            textureData[4 * IX(i, j) + 2] = 255.0;  // B
+            textureData[4 * IX(i, j)] = grid->density[IX(i, j)];  // R
+            textureData[4 * IX(i, j) + 1] = grid->density[IX(i, j)];  // G
+            textureData[4 * IX(i, j) + 2] = grid->density[IX(i, j)];  // B
             textureData[4 * IX(i, j) + 3] = grid->density[IX(i, j)];
             //grid->density[IX(i, j)] += 5.0;
             //std::cout << "grid density " << grid->density[IX(i, j)] << std::endl;
             //textureData[IX(i, j) + 3] = (grid->density[IX(i, j)]);
-            //if (grid->density[IX(i, j)] != 0) {
-            //    std::cout << "val " << (grid->density[IX(i, j)]) << std::endl;
-            //   // std::cout << "Index " << IX(i, j) << std::endl;
-            //   // std::cout << "grid density " << grid->density[IX(i, j)] << std::endl;
-            //}
+            if (grid->density[IX(i, j)] != 0) {
+                //std::cout << "density val " << (grid->density[IX(i, j)]) << std::endl;
+               // std::cout << "Index " << IX(i, j) << std::endl;
+               // std::cout << "grid density " << grid->density[IX(i, j)] << std::endl;
+            }
         }
     }
 
@@ -676,6 +690,6 @@ void cursor_position_callback(GLFWwindow* window, double xpos, double ypos)
         fluidGridType* fluidGrid = static_cast<fluidGridType*>(glfwGetWindowUserPointer(window));
         std::cout << "rect x adn y " << rectX << " " << rectY << " " << std::endl;
         addDensity(fluidGrid, rectX, rectY, 100.0);
-        //addVelocity(fluidGrid, rectX, rectY, 5.0, 5.0);
+        addVelocity(fluidGrid, rectX, rectY, 200.0, 200.0);
     }
 }
