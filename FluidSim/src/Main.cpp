@@ -19,6 +19,14 @@ float rectY = -1.0f;
 float rectWidth = 1.0f;
 float rectHeight = 1.0f;
 bool isDragging = false;
+float previousX = 0.0;
+float previousY = 0.0;
+
+int N = 64;
+int iter = 4;
+
+int temps = 0;
+int t = 0;
 
 float verticess[] = {
     0.0f, 0.0f, // Bottom-left corner
@@ -169,13 +177,11 @@ FragColor = texColor;
 }
     )";
 
-int N = 64;
-int iter = 4;
-
 int IX(int x, int y) {
-    int xLimit = std::min(std::max(x, 0), N-1);
-    int yLimit = std::min(std::max(y, 0), N-1);
-    int index = xLimit + yLimit * N;
+    int xlimit = std::min(std::max(x, 0), N-1);
+    int ylimit = std::min(std::max(y, 0), N-1);
+    int index = (xlimit + N * ylimit);
+    //int index = (x + N * y);
     return index;
 };
 
@@ -200,11 +206,12 @@ struct fluidGridType {
     std::vector<float> s;
 };
 
+//fluidGridType fluidGridCreate(fluidGridType &newGrid) {
 fluidGridType fluidGridCreate() {
     fluidGridType newGrid;
     newGrid.N = N;
     newGrid.dt = 0.2;
-    newGrid.diff = 0;
+    newGrid.diff = 0.0;
     newGrid.visc = 0.0000001;
     int gridSize = newGrid.N * newGrid.N;
     newGrid.Vx.assign(gridSize, 0.0);
@@ -213,20 +220,36 @@ fluidGridType fluidGridCreate() {
     newGrid.Vy0.assign(gridSize, 0.0);
     newGrid.density.assign(gridSize, 0.0);
     newGrid.s.assign(gridSize, 0.0);
+    //newGrid.Vx = new std::vector<float>(gridSize, 0.0f);
+    //newGrid.Vy = new std::vector<float>(gridSize, 0.0f);
+    //newGrid.Vx0 = new std::vector<float>(gridSize, 0.0f);
+    //newGrid.Vy0 = new std::vector<float>(gridSize, 0.0f);
+    //newGrid.density = new std::vector<float>(gridSize, 0.0f);
+    //newGrid.s = new std::vector<float>(gridSize, 0.0f);
     return newGrid;
 };
 
 void addDensity(fluidGridType* grid, int x, int y, float amount) {
     grid->density[IX(x, y)] += amount;
+
+    //grid->density[IX(x, y)] += grid->dt*grid->s[IX(x, y)];
 };
 
 void addVelocity(fluidGridType* grid, int x, int y, float amountX, float amountY) {
     int index = IX(x, y);
     grid->Vx[index] += amountX;
     grid->Vy[index] += amountY;
+
+    //grid->Vx[index] += grid->dt * grid->Vx0[IX(x, y)];
+    //grid->Vy[index] += grid->dt * grid->Vy0[IX(x, y)];
+
+    //if (grid->Vx[index] != 0) {
+    //    std::cout << "Non zero veloctiy at index: " << index << "velocity amt " << grid->Vx[index] << std::endl;
+    //}
 };
 
-static void set_bnd(int b, std::vector<float> x) {
+static void set_bnd(int b, std::vector<float>& x) {
+
     for (int i = 1; i < N - 1; i++) {
         x[IX(i, 0)] = b == 2 ? -x[IX(i, 1)] : x[IX(i, 1)];
         x[IX(i, N - 1)] = b == 2 ? -x[IX(i, N - 2)] : x[IX(i, N - 2)];
@@ -250,24 +273,30 @@ static void set_bnd(int b, std::vector<float> x) {
         + x[IX(N - 1, N - 2)]);
 };
 
-static void lin_solve(int b, std::vector<float> x, std::vector<float> x0, float a, float c) {
+static void lin_solve(int b, std::vector<float> &x, std::vector<float> &x0, float a, float c) {
     float cRecip = 1.0 / c;
     for (int k = 0; k < iter; k++) {
         for (int j = 1; j < N - 1; j++) {
             for (int i = 1; i < N - 1; i++) {
                 x[IX(i, j)] = (x0[IX(i, j)] + a * (x[IX(i + 1, j)] + x[IX(i - 1, j)] + x[IX(i, j + 1)] + x[IX(i, j - 1)])) * cRecip;
+                //if (i == 32 && j == 32) {
+                //    std::cout << "lin solve x " << x[IX(i, j)] << std::endl;
+                //    std::cout << "s " << x[IX(i, j)] << std::endl;
+                //    std::cout << "density " << x0[IX(i, j)] << std::endl;
+                //}
             }
         }
         set_bnd(b, x);
     }
 };
 
-static void diffuse(int b, std::vector<float> x, std::vector<float> x0, float diff, float dt) {
+static void diffuse(int b, std::vector<float> &x, std::vector<float>& x0, float diff, float dt) {
     float a = dt * diff * (N - 2) * (N - 2);
+    std::cout << "a " << a << std::endl;
     lin_solve(b, x, x0, a, 1 + 4 * a);
 };
 
-static void project(std::vector<float> velocX, std::vector<float> velocY, std::vector<float> p, std::vector<float> div) {
+static void project(std::vector<float>& velocX, std::vector<float>& velocY, std::vector<float>& p, std::vector<float>& div) {
     for (int j = 1; j < N - 1; j++) {
         for (int i = 1; i < N - 1; i++) {
             div[IX(i, j)] = -0.5f * (
@@ -291,7 +320,7 @@ static void project(std::vector<float> velocX, std::vector<float> velocY, std::v
     set_bnd(2, velocY);
 };
 
-static void advect(int b, std::vector<float> d, std::vector<float> d0, std::vector<float> velocX, std::vector<float> velocY, float dt) {
+static void advect(int b, std::vector<float>& d, std::vector<float>& d0, std::vector<float>& velocX, std::vector<float>& velocY, float dt) {
     float i0, i1, j0, j1;
     float dtx = dt * (N - 2);
     float dty = dt * (N - 2);
@@ -303,20 +332,45 @@ static void advect(int b, std::vector<float> d, std::vector<float> d0, std::vect
     float ifloat, jfloat;
     int i, j;
 
+    /// tmp1 = 409.2
+    // velocX = 33.0
+    // x = -349.2
+
+    //std::cout << "ADVECT D " << d[IX(32, 32)] << std::endl;
+
     for (j = 1, jfloat = 1; j < N - 1; j++, jfloat++) {
         for (i = 1, ifloat = 1; i < N - 1; i++, ifloat++) {
             tmp1 = dtx * velocX[IX(i, j)];
             tmp2 = dty * velocY[IX(i, j)];
-            x = ifloat - tmp1;
-            y = jfloat - tmp2;
+
+            //if (tmp1 != 0) {
+            //    std::cout << "tmp1 " << tmp1 << std::endl;
+            //    std::cout << "velocX " << velocX[IX(i, j)] << std::endl;
+            //}
+
+            //x = ifloat - tmp1;
+            //y = jfloat - tmp2;
+
+            //std::cout << "x ifloat whatever " << x << std::endl;
+
+            x = i - dt * velocX[IX(i, j)];
+            y = j - dt * velocY[IX(i, j)];
+
+            //if (velocX[IX(i, j)] != 0) {
+
+            //    std::cout << "veloc " << dt * velocX[IX(i, j)] << std::endl;
+
+            //    std::cout << "x " << x << std::endl;
+            //}
+
 
             if (x < 0.5f) x = 0.5f;
             if (x > Nfloat + 0.5f) x = Nfloat + 0.5f;
-            i0 = floorf(x);
+            i0 = int(x);
             i1 = i0 + 1.0f;
             if (y < 0.5f) y = 0.5f;
             if (y > Nfloat + 0.5f) y = Nfloat + 0.5f;
-            j0 = floorf(y);
+            j0 = int(y);
             j1 = j0 + 1.0f;
 
             s1 = x - i0;
@@ -324,25 +378,66 @@ static void advect(int b, std::vector<float> d, std::vector<float> d0, std::vect
             t1 = y - j0;
             t0 = 1.0f - t1;
 
-            int i0i = int(i0);
-            int i1i = int(i1);
-            int j0i = int(j0);
-            int j1i = int(j1);
 
             d[IX(i, j)] =
-                s0 * (t0 * d0[IX(i0i, j0i)] + t1 * d0[IX(i0i, j1i)]) +
-                s1 * (t0 * d0[IX(i1i, j0i)] + t1 * d0[IX(i1i, j1i)]);
+                s0 * (t0 * d0[IX(i0, j0)] + t1 * d0[IX(i0, j1)]) +
+                s1 * (t0 * d0[IX(i1, j0)] + t1 * d0[IX(i1, j1)]);
 
-            if (d[IX(i, j)] != 0) {
-                std::cout << "density advect " << d[IX(i, j)] << std::endl;
-            }
+            //int i0i = int(i0);
+            //int i1i = int(i1);
+            //int j0i = int(j0);
+            //int j1i = int(j1);
+
+            //d[IX(i, j)] =
+            //    s0 * (t0 * d0[IX(i0i, j0i)] + t1 * d0[IX(i0i, j1i)]) +
+            //    s1 * (t0 * d0[IX(i1i, j0i)] + t1 * d0[IX(i1i, j1i)]);
+
+           // std::cout << "x " << x << std::endl;
+            //std::cout << "i0 " << i0 << std::endl;
+            //if (velocX[IX(i, j)] != 0) {
+            //    std::cout << "s0 " << s0 << std::endl;
+            //    std::cout << "s1 " << s1 << std::endl;
+
+
+            //    std::cout << "t1 " << t1 << std::endl;
+            //    std::cout << "t0 " << t0 << std::endl;
+            //}
+
+            //if (velocX[IX(i, j)] != 0) {
+            //    std::cout << "I0, J0 " << d0[IX(i0, j0)] << std::endl;
+            //    std::cout << "I0, J1 " << d0[IX(i0, j1)] << std::endl;
+            //    std::cout << "I1, J0 " << d0[IX(i1, j0)] << std::endl;
+            //    std::cout << "I1, J1 " << d0[IX(i1, j1)] << std::endl;
+            //}
+
+            //std::cout << "s0 " << s0 * (t0 * d0[IX(i0i, j0i)] + t1 * d0[IX(i0i, j1i)]) << std::endl;
+            //std::cout << "s1 " << s1 * (t0 * d0[IX(i1i, j0i)] + t1 * d0[IX(i1i, j1i)]) << std::endl;
+
+            //float tempS0 = s0 * (t0 * d0[IX(i0, j0)] + t1 * d0[IX(i0, j1)]);
+            //float tempS1 = s1 * (t0 * d0[IX(i1, j0)] + t1 * d0[IX(i1, j1)]);
+
+            //if (tempS0 != 0) {
+            //    std::cout << "s0 ----" << s0 * (t0 * d0[IX(i0, j0)] + t1 * d0[IX(i0, j1)]) << std::endl;
+            //}
+
+            //if (tempS1 != 0) {
+            //    std::cout << "s1 ----" << s1 * (t0 * d0[IX(i1, j0)] + t1 * d0[IX(i1, j1)]) << std::endl;
+            //}
+
+           //// std::cout << "i0i, j0i" << d0[IX(i0i, j0i)] << std::endl;
+
+            //if (d[IX(i, j)] != 0) {
+            //    std::cout << "density advect ------- " << d[IX(i, j)] << std::endl;
+            //}
         }
     }
 
     set_bnd(b, d);
+
+//    std::cout << "ADVECT D AFTER " << d[IX(32, 32)] << std::endl;
 };
 
-void step(fluidGridType* grid) {
+static void step(fluidGridType* grid) {
     //float visc = grid->visc;
     //float diff = grid->diff;
     //float dt = grid->dt;
@@ -355,6 +450,18 @@ void step(fluidGridType* grid) {
     //std::vector<float> s = grid->s;
     //std::vector<float> density = grid->density;
 
+    //float visc = grid.visc;
+    //float diff = grid.diff;
+    //float dt = grid.dt;
+
+    //std::vector<float> Vx = grid.Vx;
+    //std::vector<float> Vy = grid.Vy;
+    //std::vector<float> Vx0 = grid.Vx0;
+    //std::vector<float> Vy0 = grid.Vy0;
+
+    //std::vector<float> s = grid.s;
+    //std::vector<float> density = grid.density;
+
     diffuse(1, grid->Vx0, grid->Vx, grid->visc, grid->dt);
     diffuse(2, grid->Vy0, grid->Vy, grid->visc, grid->dt);
 
@@ -365,11 +472,45 @@ void step(fluidGridType* grid) {
 
     project(grid->Vx, grid->Vy, grid->Vx0, grid->Vy0);
 
+    //std::cout << "Diffuse denisty *****" << std::endl;
     diffuse(0, grid->s, grid->density, grid->diff, grid->dt);
+// The issue lies here. grid->density is not updated even though the d value in advection is
     advect(0, grid->density, grid->s, grid->Vx, grid->Vy, grid->dt);
+
+    //diffuse(1, grid.Vx0, grid.Vx, grid.visc, grid.dt);
+    //diffuse(2, grid.Vy0, grid.Vy, grid.visc, grid.dt);
+
+    //project(grid.Vx0, grid.Vy0, grid.Vx, grid.Vy);
+
+    //advect(1, grid.Vx, grid.Vx0, grid.Vx0, grid.Vy0, grid.dt);
+    //advect(2, grid.Vy, grid.Vy0, grid.Vx0, grid.Vy0, grid.dt);
+
+    //project(grid.Vx, grid.Vy, grid.Vx0, grid.Vy0);
+
+    //std::cout << "Diffuse denisty *****" << std::endl;
+    //diffuse(0, grid.s, grid.density, grid.diff, grid.dt);
+    //advect(0, grid.density, grid.s, grid.Vx, grid.Vy, grid.dt);
+
+
+    //diffuse(1, Vx0, Vx, visc, dt);
+    //diffuse(2, Vy0, Vy, visc, dt);
+
+    //project(Vx0, Vy0, Vx, Vy);
+
+    //advect(1, Vx, Vx0, Vx0, Vy0, dt);
+    //advect(2, Vy, Vy0, Vx0, Vy0, dt);
+
+    //project(Vx, Vy, Vx0, Vy0);
+
+    //std::cout << "Diffuse denisty *****" << std::endl;
+    //diffuse(0, s, density, diff, dt);
+    //advect(0, density, s, Vx, Vy, dt);
+
+    std::cout << "advect outside " << grid->density[IX(32, 32)] << std::endl;
+    //std::cout << "advect outside " << density[IX(32, 32)] << std::endl;
 };
 
-void test(fluidGridType* grid) {
+static void test(fluidGridType* grid) {
     int min = 0;
     int max = N;
     std::random_device rd;
@@ -377,31 +518,54 @@ void test(fluidGridType* grid) {
     std::uniform_int_distribution<> distrib(min, max);
     rectX = distrib(gen);
     rectY = distrib(gen);
+    float velX = float(distrib(gen));
+    float velY = float(distrib(gen));
+    //if (temps < 1) {
+    //    std::cout << "temps -----------------------------------------------------------------" << std::endl;
+    //    addDensity(grid, 32, 32, 150.0);
+    //    addVelocity(grid, 33, 33, 1.0, 1.0);
+    //}
+    //temps += 1;
+
     addDensity(grid, rectX, rectY, 150.0);
-    addVelocity(grid, rectX, rectY, 100.0, 100.0);
+    addVelocity(grid, velX, velY, 0.1, 0.1);
+    //addDensity(grid, 32, 32, 150.0);
+    //addVelocity(grid, 32, 32, .1, .1);
 }
 
 
-void draw(fluidGridType* grid, unsigned int texture) {
-    step(grid);
+static void draw(fluidGridType* grid, unsigned int texture) {
+
+    std::cout << "Draw begin " << grid->density[IX(32, 32)] << std::endl;
+
     //test(grid);
+    step(grid);
+
+    std::cout << "Draw after step " << grid->density[IX(32, 32)] << std::endl;
 
     std::vector<unsigned char> textureData(N * N * 4);
 
+    std::cout << " New iteration ************************************************ " << std::endl;
+
     for (int i = 0; i < N; i++) {
         for (int j = 0; j < N; j++) {
-            textureData[4 * IX(i, j)] = grid->density[IX(i, j)];  // R
-            textureData[4 * IX(i, j) + 1] = grid->density[IX(i, j)];  // G
-            textureData[4 * IX(i, j) + 2] = grid->density[IX(i, j)];  // B
-            textureData[4 * IX(i, j) + 3] = grid->density[IX(i, j)];
+            float d = grid->density[IX(i, j)];
+            textureData[4 * IX(i, j)] = d;  // R
+            textureData[4 * IX(i, j) + 1] = d;  // G
+            textureData[4 * IX(i, j) + 2] = d;  // B
+            textureData[4 * IX(i, j) + 3] = 255.0;
             //grid->density[IX(i, j)] += 5.0;
             //std::cout << "grid density " << grid->density[IX(i, j)] << std::endl;
             //textureData[IX(i, j) + 3] = (grid->density[IX(i, j)]);
-            if (grid->density[IX(i, j)] != 0) {
-                //std::cout << "density val " << (grid->density[IX(i, j)]) << std::endl;
-               // std::cout << "Index " << IX(i, j) << std::endl;
-               // std::cout << "grid density " << grid->density[IX(i, j)] << std::endl;
-            }
+            //if (grid->density[IX(i, j)] != 0) {
+            //    std::cout << "Index " << IX(i, j) << std::endl;
+            //    std::cout << "grid density " << grid->density[IX(i, j)] << std::endl;
+            //}
+
+            //if (grid->Vx[IX(i, j)] != 0) {
+            //    std::cout << "Velocity index " << IX(i, j) << std::endl;
+            //    std::cout << "Vx " << grid->Vx[IX(i, j)] << std::endl;
+            //}
         }
     }
 
@@ -414,6 +578,9 @@ void draw(fluidGridType* grid, unsigned int texture) {
 int main(void)
 
 {
+    //fluidGridType fluidGrid;
+    //fluidGridCreate(fluidGrid);
+
     fluidGridType fluidGrid = fluidGridCreate();
 
     GLFWwindow* window;
@@ -589,9 +756,13 @@ int main(void)
 
     /* Loop until the user closes the window */
     while (!glfwWindowShouldClose(window))
+    //int temp = 0;
+    //while(temp < 5)
     {
 
         processInput(window);
+
+        //addDensity(fluidGrid, 32, 32, 100.0);
 
         draw(&fluidGrid, texture);
 
@@ -635,6 +806,7 @@ int main(void)
 
         /* Poll for and process events (such as inputs) */
         glfwPollEvents();
+        //temp += 1;
     }
 
     glDeleteVertexArrays(1, &VAO);
@@ -681,6 +853,9 @@ void cursor_position_callback(GLFWwindow* window, double xpos, double ypos)
         rectX = (float)xpos;
         rectY = SCREEN_HEIGHT - (float)ypos; // Invert Y axis to match OpenGL coordinates
 
+        float amtX = rectX - previousX;
+        float amtY = rectY - previousY;
+
         //float textureX = (rectX / SCREEN_WIDTH) * SCREEN_WIDTH;
         //float textureY = (rectY / SCREEN_HEIGHT) * SCREEN_HEIGHT;
 
@@ -688,8 +863,19 @@ void cursor_position_callback(GLFWwindow* window, double xpos, double ypos)
         //rectX = textureX;
         //rectY = textureY;
         fluidGridType* fluidGrid = static_cast<fluidGridType*>(glfwGetWindowUserPointer(window));
-        std::cout << "rect x adn y " << rectX << " " << rectY << " " << std::endl;
-        addDensity(fluidGrid, rectX, rectY, 100.0);
-        addVelocity(fluidGrid, rectX, rectY, 200.0, 200.0);
+        //std::cout << "rect x adn y " << rectX << " " << rectY << " " << std::endl;
+        addDensity(fluidGrid, rectX, rectY, 150.0);
+        //for (int i = 0; i < 2; i++) {
+        //    static std::default_random_engine generator;
+        //    static std::uniform_real_distribution<float> distribution(0.0, 1.0);
+        //    float noise = distribution(generator);
+        //    float angle = noise * 6.28318530718 * 2;
+        //    float vx = cos(angle) * 0.2;
+        //    float vy = sin(angle) * 0.2;
+        //    addVelocity(fluidGrid, rectX, rectY, vx, vy);
+        //}
+        addVelocity(fluidGrid, rectX, rectY, 0.01, 0.01);
+        previousX = rectX;
+        previousY = rectY;
     }
 }
