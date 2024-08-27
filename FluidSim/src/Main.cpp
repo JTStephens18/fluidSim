@@ -171,7 +171,7 @@ static void project(std::vector<float>& velocX, std::vector<float>& velocY, std:
 
     for (int j = 1; j < N - 1; j++) {
         for (int i = 1; i < N - 1; i++) {
-            velocX[IX(i, j)] -= -0.5f * (p[IX(i + 1, j)] - p[IX(i - 1, j)]) * N;
+            velocX[IX(i, j)] -= 0.5f * (p[IX(i + 1, j)] - p[IX(i - 1, j)]) * N;
             velocY[IX(i, j)] -= 0.5f * (p[IX(i, j + 1)] - p[IX(i, j - 1)]) * N;
         }
     }
@@ -275,7 +275,7 @@ static void test(fluidGridType* grid) {
 
 static void draw(fluidGridType* grid, unsigned int texture) {
 
-    test(grid);
+   // test(grid);
     step(grid);
 
     std::vector<unsigned char> textureData(N * N * 4);
