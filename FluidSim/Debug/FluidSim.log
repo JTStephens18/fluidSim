@@ -1,56 +1,52 @@
 ﻿  Main.cpp
-C:\Users\JTSte\source\repos\FluidSim\FluidSim\src\Main.cpp(90,18): warning C4305: '=': truncation from 'double' to 'float'
-C:\Users\JTSte\source\repos\FluidSim\FluidSim\src\Main.cpp(92,20): warning C4305: '=': truncation from 'double' to 'float'
-C:\Users\JTSte\source\repos\FluidSim\FluidSim\src\Main.cpp(143,18): warning C4244: 'initializing': conversion from 'double' to 'float', possible loss of data
-C:\Users\JTSte\source\repos\FluidSim\FluidSim\src\Main.cpp(191,18): warning C4244: 'initializing': conversion from 'int' to 'float', possible loss of data
-C:\Users\JTSte\source\repos\FluidSim\FluidSim\src\Main.cpp(205,21): warning C4244: '=': conversion from 'int' to 'float', possible loss of data
+C:\Users\JTSte\source\repos\FluidSim\FluidSim\src\Main.cpp(91,18): warning C4305: '=': truncation from 'double' to 'float'
+C:\Users\JTSte\source\repos\FluidSim\FluidSim\src\Main.cpp(93,20): warning C4305: '=': truncation from 'double' to 'float'
+C:\Users\JTSte\source\repos\FluidSim\FluidSim\src\Main.cpp(144,18): warning C4244: 'initializing': conversion from 'double' to 'float', possible loss of data
+C:\Users\JTSte\source\repos\FluidSim\FluidSim\src\Main.cpp(192,18): warning C4244: 'initializing': conversion from 'int' to 'float', possible loss of data
 C:\Users\JTSte\source\repos\FluidSim\FluidSim\src\Main.cpp(209,21): warning C4244: '=': conversion from 'int' to 'float', possible loss of data
-C:\Users\JTSte\source\repos\FluidSim\FluidSim\src\Main.cpp(219,38): warning C4244: 'argument': conversion from 'float' to 'int', possible loss of data
-C:\Users\JTSte\source\repos\FluidSim\FluidSim\src\Main.cpp(219,34): warning C4244: 'argument': conversion from 'float' to 'int', possible loss of data
-C:\Users\JTSte\source\repos\FluidSim\FluidSim\src\Main.cpp(219,60): warning C4244: 'argument': conversion from 'float' to 'int', possible loss of data
-C:\Users\JTSte\source\repos\FluidSim\FluidSim\src\Main.cpp(219,56): warning C4244: 'argument': conversion from 'float' to 'int', possible loss of data
-C:\Users\JTSte\source\repos\FluidSim\FluidSim\src\Main.cpp(220,38): warning C4244: 'argument': conversion from 'float' to 'int', possible loss of data
-C:\Users\JTSte\source\repos\FluidSim\FluidSim\src\Main.cpp(220,34): warning C4244: 'argument': conversion from 'float' to 'int', possible loss of data
-C:\Users\JTSte\source\repos\FluidSim\FluidSim\src\Main.cpp(220,60): warning C4244: 'argument': conversion from 'float' to 'int', possible loss of data
-C:\Users\JTSte\source\repos\FluidSim\FluidSim\src\Main.cpp(220,56): warning C4244: 'argument': conversion from 'float' to 'int', possible loss of data
-C:\Users\JTSte\source\repos\FluidSim\FluidSim\src\Main.cpp(249,20): warning C4244: '=': conversion from 'int' to 'float', possible loss of data
-C:\Users\JTSte\source\repos\FluidSim\FluidSim\src\Main.cpp(250,20): warning C4244: '=': conversion from 'int' to 'float', possible loss of data
-C:\Users\JTSte\source\repos\FluidSim\FluidSim\src\Main.cpp(261,46): warning C4244: 'argument': conversion from 'int' to 'float', possible loss of data
-C:\Users\JTSte\source\repos\FluidSim\FluidSim\src\Main.cpp(261,41): warning C4244: 'argument': conversion from 'float' to 'int', possible loss of data
-C:\Users\JTSte\source\repos\FluidSim\FluidSim\src\Main.cpp(261,33): warning C4244: 'argument': conversion from 'float' to 'int', possible loss of data
-C:\Users\JTSte\source\repos\FluidSim\FluidSim\src\Main.cpp(268,21): warning C4244: 'initializing': conversion from 'double' to 'float', possible loss of data
-C:\Users\JTSte\source\repos\FluidSim\FluidSim\src\Main.cpp(269,18): warning C4244: 'initializing': conversion from 'double' to 'float', possible loss of data
-C:\Users\JTSte\source\repos\FluidSim\FluidSim\src\Main.cpp(270,18): warning C4244: 'initializing': conversion from 'double' to 'float', possible loss of data
-C:\Users\JTSte\source\repos\FluidSim\FluidSim\src\Main.cpp(271,40): warning C4305: 'argument': truncation from 'double' to 'float'
-C:\Users\JTSte\source\repos\FluidSim\FluidSim\src\Main.cpp(271,35): warning C4305: 'argument': truncation from 'double' to 'float'
-C:\Users\JTSte\source\repos\FluidSim\FluidSim\src\Main.cpp(271,31): warning C4244: 'argument': conversion from 'float' to 'int', possible loss of data
-C:\Users\JTSte\source\repos\FluidSim\FluidSim\src\Main.cpp(271,27): warning C4244: 'argument': conversion from 'float' to 'int', possible loss of data
-C:\Users\JTSte\source\repos\FluidSim\FluidSim\src\Main.cpp(286,41): warning C4244: '=': conversion from 'float' to '_Ty', possible loss of data
-C:\Users\JTSte\source\repos\FluidSim\FluidSim\src\Main.cpp(286,41): warning C4244:         with
-C:\Users\JTSte\source\repos\FluidSim\FluidSim\src\Main.cpp(286,41): warning C4244:         [
-C:\Users\JTSte\source\repos\FluidSim\FluidSim\src\Main.cpp(286,41): warning C4244:             _Ty=unsigned char
-C:\Users\JTSte\source\repos\FluidSim\FluidSim\src\Main.cpp(286,41): warning C4244:         ]
-C:\Users\JTSte\source\repos\FluidSim\FluidSim\src\Main.cpp(287,45): warning C4244: '=': conversion from 'float' to '_Ty', possible loss of data
-C:\Users\JTSte\source\repos\FluidSim\FluidSim\src\Main.cpp(287,45): warning C4244:         with
-C:\Users\JTSte\source\repos\FluidSim\FluidSim\src\Main.cpp(287,45): warning C4244:         [
-C:\Users\JTSte\source\repos\FluidSim\FluidSim\src\Main.cpp(287,45): warning C4244:             _Ty=unsigned char
-C:\Users\JTSte\source\repos\FluidSim\FluidSim\src\Main.cpp(287,45): warning C4244:         ]
-C:\Users\JTSte\source\repos\FluidSim\FluidSim\src\Main.cpp(288,45): warning C4244: '=': conversion from 'float' to '_Ty', possible loss of data
-C:\Users\JTSte\source\repos\FluidSim\FluidSim\src\Main.cpp(288,45): warning C4244:         with
-C:\Users\JTSte\source\repos\FluidSim\FluidSim\src\Main.cpp(288,45): warning C4244:         [
-C:\Users\JTSte\source\repos\FluidSim\FluidSim\src\Main.cpp(288,45): warning C4244:             _Ty=unsigned char
-C:\Users\JTSte\source\repos\FluidSim\FluidSim\src\Main.cpp(288,45): warning C4244:         ]
-C:\Users\JTSte\source\repos\FluidSim\FluidSim\src\Main.cpp(289,45): warning C4244: '=': conversion from 'double' to '_Ty', possible loss of data
-C:\Users\JTSte\source\repos\FluidSim\FluidSim\src\Main.cpp(289,45): warning C4244:         with
-C:\Users\JTSte\source\repos\FluidSim\FluidSim\src\Main.cpp(289,45): warning C4244:         [
-C:\Users\JTSte\source\repos\FluidSim\FluidSim\src\Main.cpp(289,45): warning C4244:             _Ty=unsigned char
-C:\Users\JTSte\source\repos\FluidSim\FluidSim\src\Main.cpp(289,45): warning C4244:         ]
-C:\Users\JTSte\source\repos\FluidSim\FluidSim\src\Main.cpp(536,39): warning C4244: 'argument': conversion from 'int' to 'float', possible loss of data
-C:\Users\JTSte\source\repos\FluidSim\FluidSim\src\Main.cpp(537,39): warning C4244: 'argument': conversion from 'int' to 'float', possible loss of data
-C:\Users\JTSte\source\repos\FluidSim\FluidSim\src\Main.cpp(543,38): warning C4244: 'argument': conversion from 'float' to 'int', possible loss of data
-C:\Users\JTSte\source\repos\FluidSim\FluidSim\src\Main.cpp(543,31): warning C4244: 'argument': conversion from 'float' to 'int', possible loss of data
-C:\Users\JTSte\source\repos\FluidSim\FluidSim\src\Main.cpp(544,39): warning C4244: 'argument': conversion from 'float' to 'int', possible loss of data
-C:\Users\JTSte\source\repos\FluidSim\FluidSim\src\Main.cpp(544,32): warning C4244: 'argument': conversion from 'float' to 'int', possible loss of data
+C:\Users\JTSte\source\repos\FluidSim\FluidSim\src\Main.cpp(213,21): warning C4244: '=': conversion from 'int' to 'float', possible loss of data
+C:\Users\JTSte\source\repos\FluidSim\FluidSim\src\Main.cpp(223,38): warning C4244: 'argument': conversion from 'float' to 'int', possible loss of data
+C:\Users\JTSte\source\repos\FluidSim\FluidSim\src\Main.cpp(223,34): warning C4244: 'argument': conversion from 'float' to 'int', possible loss of data
+C:\Users\JTSte\source\repos\FluidSim\FluidSim\src\Main.cpp(223,60): warning C4244: 'argument': conversion from 'float' to 'int', possible loss of data
+C:\Users\JTSte\source\repos\FluidSim\FluidSim\src\Main.cpp(223,56): warning C4244: 'argument': conversion from 'float' to 'int', possible loss of data
+C:\Users\JTSte\source\repos\FluidSim\FluidSim\src\Main.cpp(224,38): warning C4244: 'argument': conversion from 'float' to 'int', possible loss of data
+C:\Users\JTSte\source\repos\FluidSim\FluidSim\src\Main.cpp(224,34): warning C4244: 'argument': conversion from 'float' to 'int', possible loss of data
+C:\Users\JTSte\source\repos\FluidSim\FluidSim\src\Main.cpp(224,60): warning C4244: 'argument': conversion from 'float' to 'int', possible loss of data
+C:\Users\JTSte\source\repos\FluidSim\FluidSim\src\Main.cpp(224,56): warning C4244: 'argument': conversion from 'float' to 'int', possible loss of data
+C:\Users\JTSte\source\repos\FluidSim\FluidSim\src\Main.cpp(253,20): warning C4244: '=': conversion from 'int' to 'float', possible loss of data
+C:\Users\JTSte\source\repos\FluidSim\FluidSim\src\Main.cpp(254,20): warning C4244: '=': conversion from 'int' to 'float', possible loss of data
+C:\Users\JTSte\source\repos\FluidSim\FluidSim\src\Main.cpp(265,46): warning C4244: 'argument': conversion from 'int' to 'float', possible loss of data
+C:\Users\JTSte\source\repos\FluidSim\FluidSim\src\Main.cpp(265,41): warning C4244: 'argument': conversion from 'float' to 'int', possible loss of data
+C:\Users\JTSte\source\repos\FluidSim\FluidSim\src\Main.cpp(265,33): warning C4244: 'argument': conversion from 'float' to 'int', possible loss of data
+C:\Users\JTSte\source\repos\FluidSim\FluidSim\src\Main.cpp(273,21): warning C4244: 'initializing': conversion from 'double' to 'float', possible loss of data
+C:\Users\JTSte\source\repos\FluidSim\FluidSim\src\Main.cpp(278,31): warning C4244: 'argument': conversion from 'float' to 'int', possible loss of data
+C:\Users\JTSte\source\repos\FluidSim\FluidSim\src\Main.cpp(278,27): warning C4244: 'argument': conversion from 'float' to 'int', possible loss of data
+C:\Users\JTSte\source\repos\FluidSim\FluidSim\src\Main.cpp(293,41): warning C4244: '=': conversion from 'float' to '_Ty', possible loss of data
+C:\Users\JTSte\source\repos\FluidSim\FluidSim\src\Main.cpp(293,41): warning C4244:         with
+C:\Users\JTSte\source\repos\FluidSim\FluidSim\src\Main.cpp(293,41): warning C4244:         [
+C:\Users\JTSte\source\repos\FluidSim\FluidSim\src\Main.cpp(293,41): warning C4244:             _Ty=unsigned char
+C:\Users\JTSte\source\repos\FluidSim\FluidSim\src\Main.cpp(293,41): warning C4244:         ]
+C:\Users\JTSte\source\repos\FluidSim\FluidSim\src\Main.cpp(294,45): warning C4244: '=': conversion from 'float' to '_Ty', possible loss of data
+C:\Users\JTSte\source\repos\FluidSim\FluidSim\src\Main.cpp(294,45): warning C4244:         with
+C:\Users\JTSte\source\repos\FluidSim\FluidSim\src\Main.cpp(294,45): warning C4244:         [
+C:\Users\JTSte\source\repos\FluidSim\FluidSim\src\Main.cpp(294,45): warning C4244:             _Ty=unsigned char
+C:\Users\JTSte\source\repos\FluidSim\FluidSim\src\Main.cpp(294,45): warning C4244:         ]
+C:\Users\JTSte\source\repos\FluidSim\FluidSim\src\Main.cpp(295,45): warning C4244: '=': conversion from 'float' to '_Ty', possible loss of data
+C:\Users\JTSte\source\repos\FluidSim\FluidSim\src\Main.cpp(295,45): warning C4244:         with
+C:\Users\JTSte\source\repos\FluidSim\FluidSim\src\Main.cpp(295,45): warning C4244:         [
+C:\Users\JTSte\source\repos\FluidSim\FluidSim\src\Main.cpp(295,45): warning C4244:             _Ty=unsigned char
+C:\Users\JTSte\source\repos\FluidSim\FluidSim\src\Main.cpp(295,45): warning C4244:         ]
+C:\Users\JTSte\source\repos\FluidSim\FluidSim\src\Main.cpp(296,45): warning C4244: '=': conversion from 'double' to '_Ty', possible loss of data
+C:\Users\JTSte\source\repos\FluidSim\FluidSim\src\Main.cpp(296,45): warning C4244:         with
+C:\Users\JTSte\source\repos\FluidSim\FluidSim\src\Main.cpp(296,45): warning C4244:         [
+C:\Users\JTSte\source\repos\FluidSim\FluidSim\src\Main.cpp(296,45): warning C4244:             _Ty=unsigned char
+C:\Users\JTSte\source\repos\FluidSim\FluidSim\src\Main.cpp(296,45): warning C4244:         ]
+C:\Users\JTSte\source\repos\FluidSim\FluidSim\src\Main.cpp(543,39): warning C4244: 'argument': conversion from 'int' to 'float', possible loss of data
+C:\Users\JTSte\source\repos\FluidSim\FluidSim\src\Main.cpp(544,39): warning C4244: 'argument': conversion from 'int' to 'float', possible loss of data
+C:\Users\JTSte\source\repos\FluidSim\FluidSim\src\Main.cpp(550,38): warning C4244: 'argument': conversion from 'float' to 'int', possible loss of data
+C:\Users\JTSte\source\repos\FluidSim\FluidSim\src\Main.cpp(550,31): warning C4244: 'argument': conversion from 'float' to 'int', possible loss of data
+C:\Users\JTSte\source\repos\FluidSim\FluidSim\src\Main.cpp(551,39): warning C4244: 'argument': conversion from 'float' to 'int', possible loss of data
+C:\Users\JTSte\source\repos\FluidSim\FluidSim\src\Main.cpp(551,32): warning C4244: 'argument': conversion from 'float' to 'int', possible loss of data
 LINK : warning LNK4098: defaultlib 'LIBCMT' conflicts with use of other libs; use /NODEFAULTLIB:library
 LINK : warning LNK4098: defaultlib 'MSVCRT' conflicts with use of other libs; use /NODEFAULTLIB:library
 glew32s.lib(glew.obj) : warning LNK4099: PDB '' was not found with 'glew32s.lib(glew.obj)' or at ''; linking object as if no debug info

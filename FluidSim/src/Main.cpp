@@ -5,6 +5,7 @@
 #include <vector>
 #include <random>
 #include "stb/stb_image.h"
+#include "perlinNoise/db_perlin.hpp"
 
 void framebuffer_size_callback(GLFWwindow* window, int width, int height);
 void processInput(GLFWwindow* window);
@@ -26,7 +27,7 @@ int N = 64;
 int iter = 4;
 
 int temps = 0;
-int t = 0;
+double t = 0.0;
 
 static const char* vertexShaderSource = R"(
 #version 330 core
@@ -197,8 +198,11 @@ static void advect(int b, std::vector<float>& d, std::vector<float>& d0, std::ve
             tmp1 = dtx * velocX[IX(i, j)];
             tmp2 = dty * velocY[IX(i, j)];
 
-            x = i - dt * velocX[IX(i, j)];
-            y = j - dt * velocY[IX(i, j)];
+            x = ifloat - tmp1;
+            y = jfloat - tmp2;
+
+            //x = i - dt * velocX[IX(i, j)];
+            //y = j - dt * velocY[IX(i, j)];
 
             if (x < 0.5f) x = 0.5f;
             if (x > Nfloat + 0.5f) x = Nfloat + 0.5f;
@@ -262,20 +266,23 @@ static void test(fluidGridType* grid) {
         }
     }
     for (int i = 0; i < 2; i++) {
-        static std::default_random_engine generator;
-        static std::uniform_real_distribution<float> distribution(0.0, 1.0);
-        float noise = distribution(generator);
+        //static std::default_random_engine generator;
+        //static std::uniform_real_distribution<float> distribution(0.0, 1.0);
+        //float noise = distribution(generator);
+        double noise = db::perlin(t);
         float angle = noise * 6.28318530718 * 2;
-        float vx = cos(angle) * 0.2;
-        float vy = sin(angle) * 0.2;
-        addVelocity(grid, cx, cy, 0.1, 0.1);
+        //float angle = 1.5708;
+        float vx = cos(angle) * 1;
+        float vy = sin(angle) * 1;
+        t += 0.01;
+        addVelocity(grid, cx, cy, vx, vy);
     }
 }
 
 
 static void draw(fluidGridType* grid, unsigned int texture) {
 
-   // test(grid);
+    //test(grid);
     step(grid);
 
     std::vector<unsigned char> textureData(N * N * 4);
