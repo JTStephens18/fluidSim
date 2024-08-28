@@ -257,12 +257,8 @@ static void renderFluid(fluidGridType* grid) {
     std::mt19937 gen(rd());
     std::uniform_int_distribution<> distrib(min, max);
     int amtRand = distrib(gen);
-    rectX = distrib(gen);
-    rectY = distrib(gen);
-    float velX = float(distrib(gen));
-    float velY = float(distrib(gen));
-    //addDensity(grid, rectX, rectY, 150.0);
-    //addVelocity(grid, velX, velY, 0.1, 0.1);
+    //rectX = distrib(gen);
+    //rectY = distrib(gen);
 
     float cx = float(0.5 * N);
     float cy = float(0.5 * N);
@@ -328,7 +324,7 @@ int main(void)
     glfwCreateWindow takes in width, height, name
         returns a GLFWwindow object
     */
-    window = glfwCreateWindow(SCREEN_WIDTH, SCREEN_HEIGHT, "Hello World Triangle", NULL, NULL);
+    window = glfwCreateWindow(SCREEN_WIDTH, SCREEN_HEIGHT, "Fluid Simulation", NULL, NULL);
     if (!window)
     {
         std::cout << "Failed to create GLFW Window" << std::endl;
