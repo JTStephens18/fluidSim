@@ -243,7 +243,14 @@ static void step(fluidGridType* grid) {
     advect(0, grid->density, grid->s, grid->Vx, grid->Vy, grid->dt);
 };
 
-static void test(fluidGridType* grid) {
+static void fadeDensity(fluidGridType* grid) {
+    for (int i = 0; i < N * N; i++) {
+        float d = grid->density[i];
+        grid->density[i] = clamp(d - 0.02, 0, 255);
+    }
+};
+
+static void renderFluid(fluidGridType* grid) {
     int min = 50;
     int max = 100;
     std::random_device rd;
@@ -266,23 +273,24 @@ static void test(fluidGridType* grid) {
         }
     }
     for (int i = 0; i < 2; i++) {
-        //static std::default_random_engine generator;
-        //static std::uniform_real_distribution<float> distribution(0.0, 1.0);
-        //float noise = distribution(generator);
-        double noise = db::perlin(t);
+        static std::default_random_engine generator;
+        static std::uniform_real_distribution<float> distribution(0.0, 1.0);
+        float noise = distribution(generator);
+       // double noise = db::perlin(t);
         float angle = noise * 6.28318530718 * 2;
-        //float angle = 1.5708;
         float vx = cos(angle) * 1;
         float vy = sin(angle) * 1;
         t += 0.01;
         addVelocity(grid, cx, cy, vx, vy);
     }
+
+    fadeDensity(grid);
 }
 
 
 static void draw(fluidGridType* grid, unsigned int texture) {
 
-    //test(grid);
+    renderFluid(grid);
     step(grid);
 
     std::vector<unsigned char> textureData(N * N * 4);
